@@ -25,5 +25,7 @@ Salva todas as informações em arquivos para que possam ser recuperadas posteri
 
 ## 🛠️ Estruturas de Dados Utilizadas
 Lista: Utilizada para gerenciar o cadastro de produtos.
+
 Fila: Implementada para organizar os pedidos em ordem de chegada.
+
 Pilha: Usada para exibir o histórico de vendas no formato de "último a sair".
