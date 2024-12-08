@@ -102,17 +102,30 @@ int main() {
 // Funções de Produtos
 void cadastrarProduto(Produto **produtos, int *idCounter) {
     Produto *novo = (Produto *)malloc(sizeof(Produto));
+    if (!novo) {
+        printf(RED"Erro ao alocar memória para o produto.\n"FIM_COR);
+        return;
+    }
+
     novo->id = (*idCounter)++;
     printf(BLUE"\nDigite o nome do produto: "FIM_COR);
     scanf(" %[^\n]", novo->nome);
     printf(BLUE"Digite o preco do produto: "FIM_COR);
-    scanf("%f", &novo->preco);
+    if (scanf("%f", &novo->preco) != 1 || novo->preco < 0) {
+        printf(RED"Preço inválido!\n"FIM_COR);
+        free(novo);
+        return;
+    }
     novo->next = *produtos;
     *produtos = novo;
     printf(GREEN"Produto cadastrado com sucesso!\n"FIM_COR);
 }
 
 void listarProdutos(Produto *produtos) {
+    if (!produtos) {
+        printf(YELLOW"Nenhum produto cadastrado.\n"FIM_COR);
+        return;
+    }
     printf("\n=== Lista de Produtos ===\n");
     while (produtos) {
         printf("ID: %d | Nome: %s | Preco: R$ %.2f\n", produtos->id, produtos->nome, produtos->preco);
@@ -131,10 +144,20 @@ Produto* buscarProduto(Produto *produtos, int id) {
 // Funções de Pedidos
 void adicionarPedido(FilaPedidos *fila, Produto *produtos, int *pedidoCounter) {
     Pedido *novo = (Pedido *)malloc(sizeof(Pedido));
+    if (!novo) {
+        printf(RED"Erro ao alocar memória para o pedido.\n"FIM_COR);
+        return;
+    }
+
     novo->id = (*pedidoCounter)++;
     printf(BLUE"Digite o ID do produto: "FIM_COR);
     int produtoId;
-    scanf("%d", &produtoId);
+    if (scanf("%d", &produtoId) != 1) {
+        printf(RED"ID inválido!\n"FIM_COR);
+        free(novo);
+        return;
+    }
+
     Produto *produto = buscarProduto(produtos, produtoId);
     if (!produto) {
         printf(RED"Produto nao encontrado!\n"FIM_COR);
@@ -143,7 +166,11 @@ void adicionarPedido(FilaPedidos *fila, Produto *produtos, int *pedidoCounter) {
     }
     novo->produtoId = produtoId;
     printf(BLUE"Digite a quantidade: "FIM_COR);
-    scanf("%d", &novo->quantidade);
+    if (scanf("%d", &novo->quantidade) != 1 || novo->quantidade <= 0) {
+        printf(RED"Quantidade inválida!\n"FIM_COR);
+        free(novo);
+        return;
+    }
     novo->total = produto->preco * novo->quantidade;
     novo->next = NULL;
 
@@ -177,16 +204,26 @@ void prepararPedido(FilaPedidos *fila, Historico **historico) {
     if (!fila->head) fila->tail = NULL;
 
     Historico *novoHistorico = (Historico *)malloc(sizeof(Historico));
+    if (!novoHistorico) {
+        printf(RED"Erro ao alocar memória para o histórico.\n"FIM_COR);
+        fila->head = pedido; // Reverter a mudança
+        return;
+    }
+
     novoHistorico->pedido = *pedido;
     novoHistorico->next = *historico;
     *historico = novoHistorico;
 
     free(pedido);
-    printf("Pedido preparado e adicionado ao historico!\n");
+    printf(GREEN"Pedido preparado e adicionado ao historico!\n"FIM_COR);
 }
 
 // Funções de Histórico
 void exibirHistorico(Historico *historico) {
+    if (!historico) {
+        printf(YELLOW"Nenhum histórico de vendas disponível.\n"FIM_COR);
+        return;
+    }
     printf("\n=== Historico de Vendas ===\n");
     while (historico) {
         printf("ID Pedido: %d | Produto ID: %d | Quantidade: %d | Total: R$ %.2f\n",
