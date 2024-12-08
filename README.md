@@ -30,6 +30,4 @@ Fila: Implementada para organizar os pedidos em ordem de chegada.
 
 Pilha: Usada para exibir o histórico de vendas no formato de "último a sair".
 
-teste
-
 
