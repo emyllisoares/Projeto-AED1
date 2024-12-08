@@ -29,3 +29,14 @@ Lista: Utilizada para gerenciar o cadastro de produtos.
 Fila: Implementada para organizar os pedidos em ordem de chegada.
 
 Pilha: Usada para exibir o histórico de vendas no formato de "último a sair".
+
+## Autores
+
+1. Emylli Soares
+2. Vitória Sofia
+
+<div align="center">
+  <a align="center" href="https://github.com/wederf13/Forca/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=wederf13/Forca" />
+  </a>
+</div>
