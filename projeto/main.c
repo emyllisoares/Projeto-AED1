@@ -9,6 +9,9 @@
 #define BLUE "\e[34m"
 #define FIM_COR "\e[0m"
 
+#define PRODUTOS_FILE "produtos.dat"
+#define HISTORICO_FILE "historico.dat"
+
 // Estruturas de Dados
 typedef struct Produto {
     int id;
@@ -48,6 +51,10 @@ void exibirHistorico(Historico *historico);
 void salvarDados(Produto *produtos, Historico *historico);
 void carregarDados(Produto **produtos, Historico **historico);
 
+void liberarProdutos(Produto *produtos);
+void liberarHistorico(Historico *historico);
+void liberarPedidos(FilaPedidos *fila);
+
 // Função Principal
 int main() {
     Produto *produtos = NULL;
@@ -68,6 +75,11 @@ int main() {
         printf("6. Salvar e Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
+        if (scanf("%d", &opcao) != 1) {
+            printf(RED"Entrada invalida! Por favor, insira um número.\n"FIM_COR);
+            while (getchar() != '\n'); //Limpar buffer
+            continue;
+        }
 
         switch (opcao) {
             case 1: cadastrarProduto(&produtos, &produtoIdCounter); break;
@@ -79,6 +91,10 @@ int main() {
             default: printf(RED"Opcao invalida!\n"FIM_COR);
         }
     } while (opcao != 6);
+
+    liberarProdutos(produtos);
+    liberarPedidos(&fila);
+    liberarHistorico(historico);
 
     return 0;
 }
@@ -222,5 +238,32 @@ void carregarDados(Produto **produtos, Historico **historico) {
             *historico = novo;
         }
         fclose(file);
+    }
+}
+
+// Funções para liberar memória
+void liberarProdutos(Produto *produtos) {
+    while (produtos) {
+        Produto *temp = produtos;
+        produtos = produtos->next;
+        free(temp);
+    }
+}
+
+void liberarPedidos(FilaPedidos *fila) {
+    Pedido *atual = fila->head;
+    while (atual) {
+        Pedido *temp = atual;
+        atual = atual->next;
+        free(temp);
+    }
+    fila->head = fila->tail = NULL;
+}
+
+void liberarHistorico(Historico *historico) {
+    while (historico) {
+        Historico *temp = historico;
+        historico = historico->next;
+        free(temp);
     }
 }
