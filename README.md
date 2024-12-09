@@ -30,9 +30,6 @@ Remove o último pedido do histórico e o retorna à fila de pedidos pendentes.
 ### 7. Salvar e Sair
 Salva todas as informações em arquivos para que possam ser recuperadas posteriormente e encerra o programa.
 
-## 🛠️ Estruturas de Dados Utilizadas
-Lista: Utilizada para gerenciar o cadastro de produtos.
-
 Fila: Implementada para organizar os pedidos em ordem de chegada.
 
 Pilha: Usada para exibir o histórico de vendas no formato de "último a sair".
