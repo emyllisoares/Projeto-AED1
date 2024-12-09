@@ -24,7 +24,7 @@ Remove o próximo pedido da fila e marca-o como concluído. Os pedidos concluíd
 ### 5. Exibir Histórico de Vendas
 Mostra os pedidos já concluídos, incluindo detalhes como produtos vendidos, quantidades e valores totais.
 
-### 6. Desfazer Últimmo Preparo
+### 6. Desfazer Último Preparo
 Remove o último pedido do histórico e o retorna à fila de pedidos pendentes.
 
 ### 7. Salvar e Sair
