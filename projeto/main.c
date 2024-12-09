@@ -37,33 +37,49 @@ typedef struct Historico {
     struct Historico *next;
 } Historico;
 
+typedef struct PilhaHistorico {
+    Pedido pedido;
+    struct PilhaHistorico *next;
+} PilhaHistorico;
+
+typedef struct {
+    PilhaHistorico *top;
+} Pilha;
+
 // Protótipos de Funções
+void push(Pilha *pilha, Pedido pedido);
+Pedido* pop(Pilha *pilha);
+void desfazerPedido(Pilha *pilha, FilaPedidos *fila, Historico **historico);
+void removerDoHistorico(Historico **historico, int pedidoId);
+
 void cadastrarProduto(Produto **produtos, int *idCounter);
 void listarProdutos(Produto *produtos);
 Produto* buscarProduto(Produto *produtos, int id);
 
 void adicionarPedido(FilaPedidos *fila, Produto *produtos, int *pedidoCounter);
-void prepararPedido(FilaPedidos *fila, Historico **historico);
+void prepararPedido(FilaPedidos *fila, Historico **historico, Pilha *pilha);
 void listarPedidos(FilaPedidos *fila);
 
 void exibirHistorico(Historico *historico);
 
 void salvarDados(Produto *produtos, Historico *historico);
-void carregarDados(Produto **produtos, Historico **historico);
+void carregarDados(Produto **produtos, Historico **historico, int *produtoIdCounter, int *pedidoIdCounter);
 
 void liberarProdutos(Produto *produtos);
 void liberarHistorico(Historico *historico);
 void liberarPedidos(FilaPedidos *fila);
+void liberarPilha(Pilha *pilha);
 
 // Função Principal
 int main() {
     Produto *produtos = NULL;
     FilaPedidos fila = {NULL, NULL};
     Historico *historico = NULL;
+    Pilha pilha = {NULL}; // Pilha para desfazer pedidos
     int produtoIdCounter = 1, pedidoIdCounter = 1;
     int opcao;
 
-    carregarDados(&produtos, &historico);
+    carregarDados(&produtos, &historico, &produtoIdCounter, &pedidoIdCounter);
 
     do {
         printf(BLUE"\t\t========= CONTROLE DE VENDAS =========\n\n"FIM_COR);
@@ -72,12 +88,12 @@ int main() {
         printf("3. Adicionar Pedido\n");
         printf("4. Preparar Pedido\n");
         printf("5. Exibir Historico de Vendas\n");
-        printf("6. Salvar e Sair\n");
+        printf("6. Desfazer ultimo praparo\n");
+        printf("7. Salvar e Sair\n");
         printf("Escolha uma opcao: ");
-        scanf("%d", &opcao);
         if (scanf("%d", &opcao) != 1) {
-            printf(RED"Entrada invalida! Por favor, insira um número.\n"FIM_COR);
-            while (getchar() != '\n'); //Limpar buffer
+            printf(RED"Entrada inválida! Por favor, insira um número.\n"FIM_COR);
+            while (getchar() != '\n'); // Limpar buffer
             continue;
         }
 
@@ -85,16 +101,18 @@ int main() {
             case 1: cadastrarProduto(&produtos, &produtoIdCounter); break;
             case 2: listarProdutos(produtos); break;
             case 3: adicionarPedido(&fila, produtos, &pedidoIdCounter); break;
-            case 4: prepararPedido(&fila, &historico); break;
+            case 4: prepararPedido(&fila, &historico, &pilha); break;
             case 5: exibirHistorico(historico); break;
-            case 6: salvarDados(produtos, historico); break;
+            case 6: desfazerPedido(&pilha, &fila, &historico); break; //Nova função
+            case 7: salvarDados(produtos, historico); break;
             default: printf(RED"Opcao invalida!\n"FIM_COR);
         }
-    } while (opcao != 6);
+    } while (opcao != 7);
 
     liberarProdutos(produtos);
     liberarPedidos(&fila);
     liberarHistorico(historico);
+    liberarPilha(&pilha);
 
     return 0;
 }
@@ -183,17 +201,7 @@ void adicionarPedido(FilaPedidos *fila, Produto *produtos, int *pedidoCounter) {
     printf(GREEN"Pedido adicionado com sucesso!\n"FIM_COR);
 }
 
-void listarPedidos(FilaPedidos *fila) {
-    printf("\n=== Pedidos na Fila ===\n");
-    Pedido *current = fila->head;
-    while (current) {
-        printf("ID Pedido: %d | Produto ID: %d | Quantidade: %d | Total: R$ %.2f\n",
-               current->id, current->produtoId, current->quantidade, current->total);
-        current = current->next;
-    }
-}
-
-void prepararPedido(FilaPedidos *fila, Historico **historico) {
+void prepararPedido(FilaPedidos *fila, Historico **historico, Pilha *pilha) {
     if (!fila->head) {
         printf(RED"Nenhum pedido na fila!\n"FIM_COR);
         return;
@@ -205,7 +213,7 @@ void prepararPedido(FilaPedidos *fila, Historico **historico) {
 
     Historico *novoHistorico = (Historico *)malloc(sizeof(Historico));
     if (!novoHistorico) {
-        printf(RED"Erro ao alocar memória para o histórico.\n"FIM_COR);
+        printf(RED"Erro ao alocar memoria para o historico.\n"FIM_COR);
         fila->head = pedido; // Reverter a mudança
         return;
     }
@@ -214,14 +222,69 @@ void prepararPedido(FilaPedidos *fila, Historico **historico) {
     novoHistorico->next = *historico;
     *historico = novoHistorico;
 
+    push(pilha, *pedido);  // Adiciona à pilha para possível desfazer
+
     free(pedido);
     printf(GREEN"Pedido preparado e adicionado ao historico!\n"FIM_COR);
 }
 
-// Funções de Histórico
+//Implementação da Pilha 
+void push(Pilha *pilha, Pedido pedido) {
+    PilhaHistorico *novo = (PilhaHistorico *)malloc(sizeof(PilhaHistorico));
+    if (!novo) {
+        printf(RED"Erro ao alocar memoria para a pilha.\n"FIM_COR);
+        return;
+    }
+
+    novo->pedido = pedido;
+    novo->next = pilha->top;
+    pilha->top = novo;
+}
+
+Pedido* pop(Pilha *pilha) {
+    if (!pilha->top) {
+        printf(RED"Nenhum pedido para desfazer!\n"FIM_COR);
+        return NULL;
+    }
+
+    PilhaHistorico *topo = pilha->top;
+    Pedido *pedido = (Pedido *)malloc(sizeof(Pedido));
+    if(!pedido) {
+        printf(RED"Erro ao alocar memoria para o pedido.\n"FIM_COR);
+        return NULL;
+    }
+    *pedido = topo->pedido;
+
+    pilha ->top = topo->next;
+    free(topo);
+
+    return pedido;
+}
+
+//Desfazer útimo pedido
+void desfazerPedido(Pilha *pilha, FilaPedidos *fila, Historico **historico) {
+    Pedido *pedido = pop(pilha);
+    if (!pedido) return;
+
+    // Remover do histórico
+    removerDoHistorico(historico, pedido->id);
+
+    // Adiciona o pedido de volta na fila
+    pedido->next = NULL;
+    if (!fila->head) {
+        fila->head = fila->tail = pedido;
+    } else {
+        fila->tail->next = pedido;
+        fila->tail = pedido;
+    }
+
+    printf(GREEN"Ultimo pedido desfeito! Pedido ID %d retornado a fila.\n"FIM_COR, pedido->id);
+}
+
+
 void exibirHistorico(Historico *historico) {
     if (!historico) {
-        printf(YELLOW"Nenhum histórico de vendas disponível.\n"FIM_COR);
+        printf(YELLOW"Nenhum histórico de vendas disponivel.\n"FIM_COR);
         return;
     }
     printf("\n=== Historico de Vendas ===\n");
@@ -233,16 +296,49 @@ void exibirHistorico(Historico *historico) {
     }
 }
 
+void removerDoHistorico(Historico **historico, int pedidoId) {
+    Historico *atual = *historico;
+    Historico *anterior = NULL;
+
+    while (atual) {
+        if (atual->pedido.id == pedidoId) {
+            // Remover o nó
+            if (anterior) {
+                anterior->next = atual->next;
+            } else {
+                *historico = atual->next;
+            }
+            free(atual);
+            printf(GREEN"Pedido ID %d removido do historico com sucesso.\n"FIM_COR, pedidoId);
+            return;
+        }
+        anterior = atual;
+        atual = atual->next;
+    }
+
+    printf(YELLOW"Pedido ID %d nao encontrado no histórico.\n"FIM_COR, pedidoId);
+}
+
+
+
 // Funções de Persistência
 void salvarDados(Produto *produtos, Historico *historico) {
-    FILE *file = fopen("produtos.dat", "wb");
+    FILE *file = fopen(PRODUTOS_FILE, "wb");
+    if (!file) {
+        printf(RED"Erro ao salvar os produtos.\n"FIM_COR);
+        return;
+    }
     while (produtos) {
         fwrite(produtos, sizeof(Produto), 1, file);
         produtos = produtos->next;
     }
     fclose(file);
 
-    file = fopen("historico.dat", "wb");
+    file = fopen(HISTORICO_FILE, "wb");
+    if (!file) {
+        printf(RED"Erro ao salvar o histórico.\n"FIM_COR);
+        return;
+    }
     while (historico) {
         fwrite(&(historico->pedido), sizeof(Pedido), 1, file);
         historico = historico->next;
@@ -252,29 +348,45 @@ void salvarDados(Produto *produtos, Historico *historico) {
     printf(GREEN"Dados salvos com sucesso!\n"FIM_COR);
 }
 
-void carregarDados(Produto **produtos, Historico **historico) {
-    FILE *file = fopen("produtos.dat", "rb");
+void carregarDados(Produto **produtos, Historico **historico, int *produtoIdCounter, int *pedidoIdCounter) {
+    FILE *file = fopen(PRODUTOS_FILE, "rb");
     if (file) {
         Produto temp;
+        int maiorProdutoId = 0;
         while (fread(&temp, sizeof(Produto), 1, file)) {
             Produto *novo = (Produto *)malloc(sizeof(Produto));
+            if (!novo) break;
             *novo = temp;
             novo->next = *produtos;
             *produtos = novo;
+
+            if(temp.id > maiorProdutoId) {
+                maiorProdutoId = temp.id;
+            }
         }
         fclose(file);
+
+        *produtoIdCounter = maiorProdutoId + 1;
     }
 
-    file = fopen("historico.dat", "rb");
+    int maiorPedidoId = 0;
+    file = fopen(HISTORICO_FILE, "rb");
     if (file) {
         Pedido temp;
         while (fread(&temp, sizeof(Pedido), 1, file)) {
             Historico *novo = (Historico *)malloc(sizeof(Historico));
+            if (!novo) break;
             novo->pedido = temp;
             novo->next = *historico;
             *historico = novo;
+
+            if(temp.id > maiorPedidoId) {
+                maiorPedidoId = temp.id;
+            }
         }
         fclose(file);
+
+        *pedidoIdCounter = maiorPedidoId + 1;
     }
 }
 
@@ -301,6 +413,14 @@ void liberarHistorico(Historico *historico) {
     while (historico) {
         Historico *temp = historico;
         historico = historico->next;
+        free(temp);
+    }
+}
+
+void liberarPilha(Pilha *pilha) {
+    while (pilha->top) {
+        PilhaHistorico *temp = pilha->top;
+        pilha->top = pilha->top->next;
         free(temp);
     }
 }
