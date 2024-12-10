@@ -12,7 +12,7 @@
 #define PRODUTOS_FILE "produtos.dat"
 #define HISTORICO_FILE "historico.dat"
 
-// estruturas de Dados
+// estruturas de dados
 typedef struct Produto {
     int id;
     char nome[50];
