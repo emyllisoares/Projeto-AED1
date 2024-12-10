@@ -12,7 +12,7 @@
 #define PRODUTOS_FILE "produtos.dat"
 #define HISTORICO_FILE "historico.dat"
 
-// Estruturas de Dados
+// estruturas de Dados
 typedef struct Produto {
     int id;
     char nome[50];
@@ -46,7 +46,7 @@ typedef struct {
     PilhaHistorico *top;
 } Pilha;
 
-// Protótipos de Funções
+// protótipos de Funções
 void push(Pilha *pilha, Pedido pedido);
 Pedido* pop(Pilha *pilha);
 void desfazerPedido(Pilha *pilha, FilaPedidos *fila, Historico **historico);
@@ -70,7 +70,7 @@ void liberarHistorico(Historico *historico);
 void liberarPedidos(FilaPedidos *fila);
 void liberarPilha(Pilha *pilha);
 
-// Função Principal
+// função Principal
 int main() {
     Produto *produtos = NULL;
     FilaPedidos fila = {NULL, NULL};
@@ -117,7 +117,7 @@ int main() {
     return 0;
 }
 
-// Funções de Produtos
+// funções de Produtos
 void cadastrarProduto(Produto **produtos, int *idCounter) {
     Produto *novo = (Produto *)malloc(sizeof(Produto));
     if (!novo) {
@@ -159,7 +159,7 @@ Produto* buscarProduto(Produto *produtos, int id) {
     return NULL;
 }
 
-// Funções de Pedidos
+// funções de Pedidos
 void adicionarPedido(FilaPedidos *fila, Produto *produtos, int *pedidoCounter) {
     Pedido *novo = (Pedido *)malloc(sizeof(Pedido));
     if (!novo) {
@@ -214,7 +214,7 @@ void prepararPedido(FilaPedidos *fila, Historico **historico, Pilha *pilha) {
     Historico *novoHistorico = (Historico *)malloc(sizeof(Historico));
     if (!novoHistorico) {
         printf(RED"Erro ao alocar memoria para o historico.\n"FIM_COR);
-        fila->head = pedido; // Reverter a mudança
+        fila->head = pedido; // reverter a mudança
         return;
     }
 
@@ -222,13 +222,13 @@ void prepararPedido(FilaPedidos *fila, Historico **historico, Pilha *pilha) {
     novoHistorico->next = *historico;
     *historico = novoHistorico;
 
-    push(pilha, *pedido);  // Adiciona à pilha para possível desfazer
+    push(pilha, *pedido);  // adiciona à pilha para possível desfazer
 
     free(pedido);
     printf(GREEN"Pedido preparado e adicionado ao historico!\n"FIM_COR);
 }
 
-//Implementação da Pilha 
+//implementação da Pilha 
 void push(Pilha *pilha, Pedido pedido) {
     PilhaHistorico *novo = (PilhaHistorico *)malloc(sizeof(PilhaHistorico));
     if (!novo) {
@@ -261,15 +261,15 @@ Pedido* pop(Pilha *pilha) {
     return pedido;
 }
 
-//Desfazer útimo pedido
+//desfazer útimo pedido
 void desfazerPedido(Pilha *pilha, FilaPedidos *fila, Historico **historico) {
     Pedido *pedido = pop(pilha);
     if (!pedido) return;
 
-    // Remover do histórico
+    // remover do histórico
     removerDoHistorico(historico, pedido->id);
 
-    // Adiciona o pedido de volta na fila
+    // adiciona o pedido de volta na fila
     pedido->next = NULL;
     if (!fila->head) {
         fila->head = fila->tail = pedido;
@@ -302,7 +302,7 @@ void removerDoHistorico(Historico **historico, int pedidoId) {
 
     while (atual) {
         if (atual->pedido.id == pedidoId) {
-            // Remover o nó
+            // remover o nó
             if (anterior) {
                 anterior->next = atual->next;
             } else {
@@ -321,7 +321,7 @@ void removerDoHistorico(Historico **historico, int pedidoId) {
 
 
 
-// Funções de Persistência
+// funções de Persistência
 void salvarDados(Produto *produtos, Historico *historico) {
     FILE *file = fopen(PRODUTOS_FILE, "wb");
     if (!file) {
@@ -390,7 +390,7 @@ void carregarDados(Produto **produtos, Historico **historico, int *produtoIdCoun
     }
 }
 
-// Funções para liberar memória
+// funções para liberar memória
 void liberarProdutos(Produto *produtos) {
     while (produtos) {
         Produto *temp = produtos;
