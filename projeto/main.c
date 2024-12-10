@@ -146,7 +146,7 @@ void listarProdutos(Produto *produtos) {
     }
     printf("\n=== Lista de Produtos ===\n");
     while (produtos) {
-        printf("ID: %d | Nome: %s | Preco: R$ %.2f\n", produtos->id, produtos->nome, produtos->preco);
+        printf("ID: %d | Preco: R$ %.2f | Nome: %s \n", produtos->id, produtos->preco, produtos->nome);
         produtos = produtos->next;
     }
 }
