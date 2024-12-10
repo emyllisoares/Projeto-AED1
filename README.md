@@ -5,8 +5,6 @@ Este projeto é um sistema que implementa um controle de vendas para um restaura
 
 Ele foi desenvolvido como projeto final para a disciplina Algoritmo e Estrutura de Dados 1 do curso de Ciência da Computação - UFG.
 
----
-
 ## 🌐 **Instalação**
 
 ### Linux
@@ -22,8 +20,6 @@ Compile o programa utilizando um compilador C:
 Download Zip
 Abrir main.c
 ```
-
----
 
 ## 🌟 **Funcionalidades**
 
@@ -47,8 +43,6 @@ Abrir main.c
    - Salvar produtos e histórico de vendas em arquivos binários.
    - Carregar os dados salvos ao iniciar o programa.
 
----
-
 ## ⚙️ Estrutura do Código
 
 - **Estruturas**:
@@ -63,8 +57,6 @@ Abrir main.c
   - Adicionar, preparar e listar pedidos.
   - Operações de desfazer, utilizando pilha.
   - Persistência de dados em arquivos binários.
-
----
 
 ## 📋 Exemplo de Uso
 
@@ -82,8 +74,6 @@ Abrir main.c
 
 5. **Salvar e Sair**:
    - Salva os dados de produtos e histórico para uso posterior.
-
----
 
 ## ⚒️ Estruturas de Dados Utilizadas
 
@@ -115,14 +105,11 @@ Abrir main.c
        - **Push**: Insere o último pedido preparado no topo da pilha.
        - **Pop**: Remove o pedido mais recente do topo para desfazer a operação, reintroduzindo-o na fila.
 
----
-
 ## ❗ Observações
 
 - O código utiliza ponteiros para gerenciar estruturas dinâmicas.
 - É importante garantir que todos os recursos alocados sejam liberados corretamente para evitar vazamentos de memória.
 
---- 
 ## Autores
 
 1. Emylli Soares
